@@ -27,31 +27,41 @@ module Readability
     end
     
     def content
-      #remove style and script
       @html.css("script, style, noscript").each{|i| i.remove}
       
-      trasform_divs_into_paragraphs!
-      
-      #get all parent from p elements
       @parents=@html.css("p").map{ |p| p.parent }.compact.uniq
       
-      #andidates=score_paragraphs
       cand=@parents.map{|p| [p, score(p)]}.max{|a,b| a[1]<=>b[1]}
       sanitize(cand[0])
-      #sorted_candidates=@parents.sort{|a,b| score(a) <=> score(b)}
-      #puts sorted_candidates.class
-      #puts best_candidate=sorted_candidates.first
-      #sanitize(best_candidate[:elem])
 
     end
     
     def sanitize(node)
-      
       node.css("div").each do |el|
-        counts=Hash[ %w[p img li a embed].each{|kind| [ kind, el.css(kind) ] } ]
-        puts counts
-        el.remove if (el.text.count(",")<10)
-        #)&&(counts["p"]==0 || counts["embed"] > 0 || counts["a"]>counts["p"] || counts["li"]>counts["p"] || counts["img"]>counts["p"] )
+        
+        content_length=el.text.strip.length
+
+        if(el.text.count(",")<10)
+          to_remove=false
+          counts= %w[p img li a embed input].inject({}) {|m, kind| m[kind]=el.css(kind).length; m} 
+          if counts["p"]==0
+            to_remove=true
+          #elsif counts["img"]>counts["p"]
+            to_remove=true
+          elsif content_length<25
+            to_remove=true
+          elsif counts["li"]>counts["p"]
+            to_remove=true
+          elsif counts["input"]>counts["p"]
+            to_remove=true
+          elsif counts["embed"]>0
+            to_remove=true
+          end
+          
+          if to_remove
+            el.remove
+          end
+        end
       end
       
       whitelist=%w[div p]
@@ -63,7 +73,8 @@ module Readability
         if whitelist[el.node_name]
           el.attributes.each{|a,x| el.delete(a)}
         else
-          el.swap(el.text)
+          
+          el.swap(el.text) unless el.name=="img"
         end
         
       end
@@ -74,10 +85,10 @@ module Readability
     def trasform_divs_into_paragraphs!
       @html.css('*').each do |elem|
       
-        if elem.name.downcase=="div"
+        if elem.name.downcase=="p"
           if elem.inner_html  !~ REGEXES[:divToPRe]
             puts "changed p"
-            elem.name="p"
+            elem.name="div"
           end
         else
           #wrap text nodes in p tags
@@ -85,8 +96,7 @@ module Readability
             if child.text?
               puts "changed child"
               child.swap("<p>#{child.text}</p>")
-              #puts child.text?
-              #puts child.text
+             
             end
           end
         end
@@ -117,7 +127,7 @@ module Readability
     
     
     
-  d=Readability::Document.new(File.open("sample.html"))
+  d=Readability::Document.new(open(ARGV[0]))
     
   puts d.content
   end
