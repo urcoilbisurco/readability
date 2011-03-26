@@ -28,7 +28,7 @@ module Readability
     
     def content
       @html.css("script, style, noscript").each{|i| i.remove}
-      
+      trasform_divs_into_paragraphs!
       @parents=@html.css("p").map{ |p| p.parent }.compact.uniq
       
       cand=@parents.map{|p| [p, score(p)]}.max{|a,b| a[1]<=>b[1]}
@@ -79,26 +79,31 @@ module Readability
         
       end
       node.to_html.gsub(/[\r\n\f]+/,"\n").gsub(/[\t ]+/, " ").gsub(/&nbsp;/," ")
+      
+      #style?
+      style = Nokogiri::XML::Node.new("style", node)
+      style.content="background-color:red;"
+      node.css("*").first.add_next_sibling(style)
+      node
     end
     
     
     def trasform_divs_into_paragraphs!
       @html.css('*').each do |elem|
       
-        if elem.name.downcase=="p"
+        if elem.name.downcase=="div"
           if elem.inner_html  !~ REGEXES[:divToPRe]
             puts "changed p"
-            elem.name="div"
+            elem.name="p"
           end
-        else
+       # else
           #wrap text nodes in p tags
-          elem.children.each do |child|
-            if child.text?
-              puts "changed child"
-              child.swap("<p>#{child.text}</p>")
-             
-            end
-          end
+        #  elem.children.each do |child|
+        #    if child.text?
+        #      puts "changed child"
+        #      child.swap("<p>#{child.text}</p>")    
+        #    end
+        #  end
         end
       end
       
