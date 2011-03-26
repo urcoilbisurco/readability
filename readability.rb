@@ -35,41 +35,25 @@ module Readability
       #get all parent from p elements
       @parents=@html.css("p").map{ |p| p.parent }.compact.uniq
       
-      candidates=score_paragraphs
-      
-      sorted_candidates=candidates.values.sort{|a,b| b[:content_score] <=> a[:content_score]}
-      puts sorted_candidates.class
-      puts best_candidate=sorted_candidates.first
+      #andidates=score_paragraphs
+      cand=@parents.map{|p| [p, score(p)]}.max{|a,b| a[1]<=>b[1]}
+      sanitize(cand[0])
+      #sorted_candidates=@parents.sort{|a,b| score(a) <=> score(b)}
+      #puts sorted_candidates.class
+      #puts best_candidate=sorted_candidates.first
       #sanitize(best_candidate[:elem])
 
     end
-    def score_paragraphs
-      candidates={}
-      @parents.each do |parent|
-         score=0
-
-          #change score based on class
-          score-=50 if parent[:class] =~ REGEXES[:NotSoGoodCandidates]
-          score+=25 if parent[:class] =~ REGEXES[:GreatCandidates]
-
-          #change score based on id
-          score-=50 if parent[:id] =~ REGEXES[:NotSoGoodCandidates]
-          score+=25 if parent[:id] =~ REGEXES[:GreatCandidates]
-
-          #change score based on # of commas
-          score+=parent.text.count(",")
-          score+=parent.css("p").size
-
-          
-        candidates[parent]||={:content_score=>score, :elem=>parent}
-      end
-      candidates
-    end
-     def score(parent)
-       
-      end
     
     def sanitize(node)
+      
+      node.css("div").each do |el|
+        counts=Hash[ %w[p img li a embed].each{|kind| [ kind, el.css(kind) ] } ]
+        puts counts
+        el.remove if (el.text.count(",")<10)
+        #)&&(counts["p"]==0 || counts["embed"] > 0 || counts["a"]>counts["p"] || counts["li"]>counts["p"] || counts["img"]>counts["p"] )
+      end
+      
       whitelist=%w[div p]
       
       whitelist = Hash[whitelist.zip([true] * whitelist.size)]
@@ -108,10 +92,26 @@ module Readability
         end
       end
       
-      def score(parent)
+      
+    end
+   
+   
+    def score(parent)
+      score=0
 
+        #change score based on class
+        score-=50 if parent[:class] =~ REGEXES[:NotSoGoodCandidates]
+        score+=25 if parent[:class] =~ REGEXES[:GreatCandidates]
 
-      end
+        #change score based on id
+        score-=50 if parent[:id] =~ REGEXES[:NotSoGoodCandidates]
+        score+=25 if parent[:id] =~ REGEXES[:GreatCandidates]
+
+        #change score based on # of commas
+        score+=parent.text.count(",")
+        score+=parent.css("p").size
+      
+      score
     end
     
     
