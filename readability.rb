@@ -63,6 +63,13 @@ module Readability
         
       end
       node.to_html.gsub(/[\r\n\f]+/,"\n").gsub(/[\t ]+/, " ").gsub(/&nbsp;/," ")
+      
+      #style?
+      style = Nokogiri::XML::Node.new("style", node)
+      style.set_attribute("type","text/css")
+      style.content="body{background-color:red;}"
+      node.css("*").first.add_next_sibling(style)
+      node
     end
     
     
@@ -75,13 +82,15 @@ module Readability
             elem.name="p"
           end
        # else
-      #    #wrap text nodes in p tags
-       #   elem.children.each do |child|
-      #      if child.text?
-      #        puts "changed child"
-       #       child.swap("<p>#{child.text}</p>")       
-      #      end
-      #    end
+
+          #wrap text nodes in p tags
+        #  elem.children.each do |child|
+        #    if child.text?
+        #      puts "changed child"
+        #      child.swap("<p>#{child.text}</p>")    
+        #    end
+        #  end
+
         end
       end
       
