@@ -28,7 +28,7 @@ module Readability
     
     def content
       @html.css("script, style, noscript").each{|i| i.remove}
-      
+      trasform_divs_into_paragraphs!
       @parents=@html.css("p").map{ |p| p.parent }.compact.uniq
       
       cand=@parents.map{|p| [p, score(p)]}.max{|a,b| a[1]<=>b[1]}
@@ -42,25 +42,9 @@ module Readability
         content_length=el.text.strip.length
 
         if(el.text.count(",")<10)
-          to_remove=false
           counts= %w[p img li a embed input].inject({}) {|m, kind| m[kind]=el.css(kind).length; m} 
-          if counts["p"]==0
-            to_remove=true
-          #elsif counts["img"]>counts["p"]
-            to_remove=true
-          elsif content_length<25
-            to_remove=true
-          elsif counts["li"]>counts["p"]
-            to_remove=true
-          elsif counts["input"]>counts["p"]
-            to_remove=true
-          elsif counts["embed"]>0
-            to_remove=true
-          end
-          
-          if to_remove
-            el.remove
-          end
+          el.remove if counts["p"]==0 || content_length<25 || counts["li"]>counts["p"] || counts["input"]>counts["p"] || counts["embed"]>0
+
         end
       end
       
@@ -70,7 +54,7 @@ module Readability
       
       
       ([node]+node.css("*")).each do |el|
-        if whitelist[el.node_name]
+        if whitelist[el.name]
           el.attributes.each{|a,x| el.delete(a)}
         else
           
@@ -85,20 +69,19 @@ module Readability
     def trasform_divs_into_paragraphs!
       @html.css('*').each do |elem|
       
-        if elem.name.downcase=="p"
+        if elem.name.downcase=="div"
           if elem.inner_html  !~ REGEXES[:divToPRe]
             puts "changed p"
-            elem.name="div"
+            elem.name="p"
           end
-        else
-          #wrap text nodes in p tags
-          elem.children.each do |child|
-            if child.text?
-              puts "changed child"
-              child.swap("<p>#{child.text}</p>")
-             
-            end
-          end
+       # else
+      #    #wrap text nodes in p tags
+       #   elem.children.each do |child|
+      #      if child.text?
+      #        puts "changed child"
+       #       child.swap("<p>#{child.text}</p>")       
+      #      end
+      #    end
         end
       end
       
@@ -129,6 +112,7 @@ module Readability
     
   d=Readability::Document.new(open(ARGV[0]))
     
-  puts d.content
+  #puts d.content
+  File.open("file.html", 'w') {|f| f.write(d.content) }
   end
 end
