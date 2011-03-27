@@ -82,7 +82,8 @@ module Readability
       
       #style?
       style = Nokogiri::XML::Node.new("style", node)
-      style.content="background-color:red;"
+      style.set_attribute("type","text/css")
+      style.content="body{background-color:red;}"
       node.css("*").first.add_next_sibling(style)
       node
     end
