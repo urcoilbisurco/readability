@@ -12,7 +12,7 @@ module Readability
     
     
     REGEXES={
-      :divToPRe             =>  /<(a|blockquote|div|dl|img|ol|p|pre|ul|table)/i,
+      :divToPRe             =>  /<(blockquote|div|dl|img|ol|p|pre|ul|table)/i,
       :NotSoGoodCandidates  =>  /<(comment|meta|footer|footnote|disqus|extra|sidebar|sponsor|popup)/i,
       :GreatCandidates      =>  /<(article|body|content|entry|main|page|pagination|post|text|blog|story)/i
     }
@@ -23,12 +23,14 @@ module Readability
     end
     
     def make_html(input)
-      @html=Nokogiri::HTML(input, nil, 'UTF-8')
+      @html=Nokogiri::XML(input, nil, 'UTF-8')
     end
     
     def content
       @html.css("script, style, noscript").each{|i| i.remove}
       trasform_divs_into_paragraphs!
+
+      @html_title=@html.at_css("title").text
       @parents=@html.css("p").map{ |p| p.parent }.compact.uniq
       
       cand=@parents.map{|p| [p, score(p)]}.max{|a,b| a[1]<=>b[1]}
@@ -43,33 +45,42 @@ module Readability
 
         if(el.text.count(",")<10)
           counts= %w[p img li a embed input].inject({}) {|m, kind| m[kind]=el.css(kind).length; m} 
-          el.remove if counts["p"]==0 || content_length<25 || counts["li"]>counts["p"] || counts["input"]>counts["p"] || counts["embed"]>0
+          el.remove if counts["p"]==0 || content_length<25 || counts["li"]-1000>counts["p"] || counts["input"]>counts["p"] || counts["embed"]>0
 
         end
       end
       
-      whitelist=%w[div p]
+      whitelist=%w[div p li ul img a]
       
       whitelist = Hash[whitelist.zip([true] * whitelist.size)]
       
       
       ([node]+node.css("*")).each do |el|
         if whitelist[el.name]
-          el.attributes.each{|a,x| el.delete(a)}
+          el.attributes.each{|a,x| el.delete(a) unless %[src href].include?(a)}
         else
           
-          el.swap(el.text) unless el.name=="img"
+          el.swap(el.text)
         end
         
+     
+        
       end
-      node.to_html.gsub(/[\r\n\f]+/,"\n").gsub(/[\t ]+/, " ").gsub(/&nbsp;/," ")
+      node.to_html(:encoding=>"UTF-8").gsub(/[\r\n\f]+/,"\n").gsub(/[\t ]+/, " ").gsub(/&nbsp;/," ")
       
-      #style?
-      style = Nokogiri::XML::Node.new("style", node)
-      style.set_attribute("type","text/css")
-      style.content="body{background-color:red;}"
-      node.css("*").first.add_next_sibling(style)
-      node
+      create_output!(node)
+      create_style!
+      create_title!
+      
+      
+      #add style and node to output
+      @output.add_child(@style)
+      @output.add_child(@title)
+      @output.add_child(node)
+      
+      #returns
+      @output
+      
     end
     
     
@@ -94,9 +105,27 @@ module Readability
         end
       end
       
-      
     end
-   
+    def create_title!
+      
+      @title = Nokogiri::XML::Node.new("h2",@output)
+      @title.content=@html_title
+      
+      @title
+    end
+    
+    
+    def create_style!
+      @style = Nokogiri::XML::Node.new("style", @output)
+      @style.set_attribute("type","text/css")
+      #simple example of style
+      @style.content="body{background-color:#EDEDED;}"
+      @style.to_html(:encoding=>"UTF-8").gsub(/[\r\n\f]+/,"\n").gsub(/[\t ]+/, " ").gsub(/&nbsp;/," ")
+    end
+    def create_output!(node)
+      @output=Nokogiri::XML::Node.new("div", node)
+
+    end
    
     def score(parent)
       score=0
@@ -120,7 +149,7 @@ module Readability
     
     
   d=Readability::Document.new(open(ARGV[0]))
-    
+  #d.content 
   #puts d.content
   File.open("file.html", 'w') {|f| f.write(d.content) }
   end
