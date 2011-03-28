@@ -12,9 +12,10 @@ module Readability
     
     
     REGEXES={
-      :divToPRe             =>  /<(blockquote|div|dl|img|ol|p|pre|ul|table)/i,
+      :DivToPRe             =>  /<(blockquote|div|dl|img|ol|p|pre|ul|table)/i,
       :NotSoGoodCandidates  =>  /<(comment|meta|footer|footnote|disqus|extra|sidebar|sponsor|popup)/i,
-      :GreatCandidates      =>  /<(article|body|content|entry|main|page|pagination|post|text|blog|story)/i
+      :GreatCandidates      =>  /<(article|body|content|entry|main|page|pagination|post|text|blog|story)/i,
+      :UrlRe                =>  /^(http\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(?:\/\S*)?(?:[a-zA-Z0-9_])+\.(?:jpg|jpeg|gif|png))$/i
     }
     
     
@@ -23,7 +24,8 @@ module Readability
     end
     
     def make_html(input)
-      @html=Nokogiri::XML(input, nil, 'UTF-8')
+      @html=Nokogiri::HTML(input, nil, 'UTF-8')
+      
     end
     
     def content
@@ -40,12 +42,11 @@ module Readability
     
     def sanitize(node)
       node.css("div").each do |el|
-        
+        link_density=get_link_density(el)
         content_length=el.text.strip.length
-
         if(el.text.count(",")<10)
           counts= %w[p img li a embed input].inject({}) {|m, kind| m[kind]=el.css(kind).length; m} 
-          el.remove if counts["p"]==0 || content_length<25 || counts["li"]-1000>counts["p"] || counts["input"]>counts["p"] || counts["embed"]>0
+          el.remove if counts["p"]==0 ||link_density>0.2 ||content_length<25 ||counts["li"]-10>counts["p"] || counts["input"]>counts["p"] || counts["embed"]>0
 
         end
       end
@@ -62,7 +63,7 @@ module Readability
           
           el.swap(el.text)
         end
-        
+      change_image_src!(node)
      
         
       end
@@ -82,13 +83,27 @@ module Readability
       @output
       
     end
-    
+    def change_image_src!(node)
+      node.css("img").each do |elem|
+        
+        elem.attributes.each do |a,x|
+          #very strange code
+          if a=="src"
+            puts x; 
+            reg=(/^(http\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(?:\/\S*)?(?:[a-zA-Z0-9_])+\.(?:jpg|jpeg|gif|png))$/)
+            unless reg.match(x)?true:false
+              elem.delete(a)
+            end
+          end 
+        end
+      end
+    end
     
     def trasform_divs_into_paragraphs!
       @html.css('*').each do |elem|
       
         if elem.name.downcase=="div"
-          if elem.inner_html  !~ REGEXES[:divToPRe]
+          if elem.inner_html  !~ REGEXES[:DivToPRe]
             puts "changed p"
             elem.name="p"
           end
@@ -126,7 +141,13 @@ module Readability
       @output=Nokogiri::XML::Node.new("div", node)
 
     end
-   
+    
+    def get_link_density(elem)
+      link_length=elem.css("a").map{|i| i.text}.join("").length
+      text_length=elem.text.length
+      
+      link_length/text_length.to_f
+   end
     def score(parent)
       score=0
 
