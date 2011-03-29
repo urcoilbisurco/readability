@@ -20,6 +20,7 @@ module Readability
     
     
     def initialize(input)
+      
       make_html(input)
     end
     
@@ -89,16 +90,30 @@ module Readability
         elem.attributes.each do |a,x|
           #very strange code
           if a=="src"
-            puts x; 
+            
             reg=(/^(http\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(?:\/\S*)?(?:[a-zA-Z0-9_])+\.(?:jpg|jpeg|gif|png))$/)
             unless reg.match(x)?true:false
-              elem.delete(a)
+              #elem.delete(a)
+              create_true_url!(elem)
             end
           end 
         end
       end
     end
-    
+    def create_true_url!(elem)
+      puts elem.attribute("src")
+      puts "before"
+      a=nil
+      puts a=@@input.scan(/[^\/]+/)
+      a.pop
+      a[0]=a[0]+"/"
+      puts c=a.join("/")
+      
+      true_url= c + "/" + elem.attribute("src")
+      #puts true_url
+      elem.set_attribute("src", true_url)
+      
+    end
     def trasform_divs_into_paragraphs!
       @html.css('*').each do |elem|
       
@@ -168,8 +183,9 @@ module Readability
     
     
     
-    
-  d=Readability::Document.new(open(ARGV[0]))
+  @@input=ARGV[0]
+  puts @@input
+  d=Readability::Document.new(open(@@input))
   #d.content 
   #puts d.content
   File.open("file.html", 'w') {|f| f.write(d.content) }
