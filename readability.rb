@@ -1,44 +1,47 @@
+# encoding: utf-8
 require 'rubygems'
 require 'open-uri'
 require 'nokogiri'
-
+require './utils'
+require 'cgi'
 
 module Readability
   
-  
-  
-  
   class Document
     
-    
-    REGEXES={
-      :DivToPRe             =>  /<(blockquote|div|dl|img|ol|p|pre|ul|table)/i,
-      :NotSoGoodCandidates  =>  /<(comment|meta|footer|footnote|disqus|extra|sidebar|sponsor|popup)/i,
-      :GreatCandidates      =>  /<(article|body|content|entry|main|page|pagination|post|text|blog|story)/i,
-      :UrlRe                =>  /^(http\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(?:\/\S*)?(?:[a-zA-Z0-9_])+\.(?:jpg|jpeg|gif|png))$/i
-    }
-    
-    
     def initialize(input)
-      
       make_html(input)
     end
     
     def make_html(input)
-      @html=Nokogiri::HTML(input, nil, 'UTF-8')
-      
+      @html=Nokogiri::HTML(input.read, nil, 'UTF-8')
     end
     
     def content
       @html.css("script, style, noscript").each{|i| i.remove}
+      
       trasform_divs_into_paragraphs!
 
       @html_title=@html.at_css("title").text
       @parents=@html.css("p").map{ |p| p.parent }.compact.uniq
       
       cand=@parents.map{|p| [p, score(p)]}.max{|a,b| a[1]<=>b[1]}
-      sanitize(cand[0])
+      cleaned_text=sanitize(cand[0])
+      create_output!(cleaned_text)
+      create_style!
+      create_title!
+      
+      
+      #add style and node to output
+      @output.add_child(@style)
+      @output.add_child(@title)
+      @output.add_child(cleaned_text)
+      
+      #returns
 
+a=@output.to_html(:encoding=>"UTF-8").gsub(/[\r\n\f]+/,"\n").gsub(/[\t ]+/, " ").gsub(/&nbsp;/," ")
+puts a
+CGI::unescapeHTML(a)
     end
     
     def sanitize(node)
@@ -52,7 +55,7 @@ module Readability
         end
       end
       
-      whitelist=%w[div p li ul img a]
+      whitelist=%w[div p li ul ol img a]
       
       whitelist = Hash[whitelist.zip([true] * whitelist.size)]
       
@@ -68,93 +71,12 @@ module Readability
      
         
       end
-      node.to_html(:encoding=>"UTF-8").gsub(/[\r\n\f]+/,"\n").gsub(/[\t ]+/, " ").gsub(/&nbsp;/," ")
+      node
       
-      create_output!(node)
-      create_style!
-      create_title!
-      
-      
-      #add style and node to output
-      @output.add_child(@style)
-      @output.add_child(@title)
-      @output.add_child(node)
-      
-      #returns
-      @output
-      
-    end
-    def change_image_src!(node)
-      node.css("img").each do |elem|
-        
-        elem.attributes.each do |a,x|
-          #very strange code
-          if a=="src"
-            
-            reg=(/^(http\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(?:\/\S*)?(?:[a-zA-Z0-9_])+\.(?:jpg|jpeg|gif|png))$/)
-            unless reg.match(x)?true:false
-              #elem.delete(a)
-              create_true_url!(elem)
-            end
-          end 
-        end
-      end
-    end
-    def create_true_url!(elem)
-      puts elem.attribute("src")
-      puts "before"
-      a=nil
-      puts a=@@input.scan(/[^\/]+/)
-      a.pop
-      a[0]=a[0]+"/"
-      puts c=a.join("/")
-      
-      true_url= c + "/" + elem.attribute("src")
-      #puts true_url
-      elem.set_attribute("src", true_url)
-      
-    end
-    def trasform_divs_into_paragraphs!
-      @html.css('*').each do |elem|
-      
-        if elem.name.downcase=="div"
-          if elem.inner_html  !~ REGEXES[:DivToPRe]
-            puts "changed p"
-            elem.name="p"
-          end
-       # else
-
-          #wrap text nodes in p tags
-        #  elem.children.each do |child|
-        #    if child.text?
-        #      puts "changed child"
-        #      child.swap("<p>#{child.text}</p>")    
-        #    end
-        #  end
-
-        end
-      end
-      
-    end
-    def create_title!
-      
-      @title = Nokogiri::XML::Node.new("h2",@output)
-      @title.content=@html_title
-      
-      @title
     end
     
-    
-    def create_style!
-      @style = Nokogiri::XML::Node.new("style", @output)
-      @style.set_attribute("type","text/css")
-      #simple example of style
-      @style.content="body{background-color:#EDEDED;}"
-      @style.to_html(:encoding=>"UTF-8").gsub(/[\r\n\f]+/,"\n").gsub(/[\t ]+/, " ").gsub(/&nbsp;/," ")
-    end
     def create_output!(node)
       @output=Nokogiri::XML::Node.new("div", node)
-
     end
     
     def get_link_density(elem)
@@ -180,14 +102,12 @@ module Readability
       
       score
     end
-    
-    
-    
-  @@input=ARGV[0]
-  puts @@input
-  d=Readability::Document.new(open(@@input))
-  #d.content 
-  #puts d.content
-  File.open("file.html", 'w') {|f| f.write(d.content) }
   end
 end
+
+  @@input=ARGV[0]
+a=open(@@input)
+ d=Readability::Document.new(a)
+ #d.content 
+ #puts d.content
+ File.open("file.html", 'w') {|f| f.write(d.content) }
