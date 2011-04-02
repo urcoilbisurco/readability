@@ -1,0 +1,19 @@
+body{
+	background-color:#F3F3F3;
+	margin:30px auto;
+	width:700px;
+	
+}
+div{
+	font-size:17px;
+	text-align: justify;
+}
+h2{
+	font-size:24px;
+}
+img{
+	margin:auto;
+	float: left;
+	margin:30px;
+	margin-left:0;
+}
