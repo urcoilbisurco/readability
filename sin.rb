@@ -14,6 +14,12 @@ post '/url' do
   
   erb :url
 end
+get'/demo' do 
+  @action='url'
+  @@input='sample.html'
+  @cont=Readability::Document.new(open(@@input)).content
+  erb :url
+end
 
 
 
