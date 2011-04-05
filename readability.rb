@@ -21,7 +21,7 @@ module Readability
     def content
       @html.css("script, style, noscript").each{|i| i.remove}
       
-      trasform_divs_into_paragraphs!
+      #trasform_divs_into_paragraphs!
       
       @html_title=@html.at_css("title").text
       @parents=@html.css("p").map{ |p| p.parent }.compact.uniq
@@ -46,26 +46,30 @@ module Readability
       node.css("div").each do |el|
         link_density=get_link_density(el)
         content_length=el.text.strip.length
-        if(el.text.count(",")<10)
+        if(el.text.count(",")<20)
           counts= %w[p img li a embed input].inject({}) {|m, kind| m[kind]=el.css(kind).length; m} 
-          el.remove if counts["p"]==0 ||link_density>0.2 ||content_length<25 ||counts["li"]-10>counts["p"] || counts["input"]>counts["p"] || counts["embed"]>0
+          el.remove if counts["p"]==0 ||link_density>0.2 ||content_length<25 ||counts["li"]-10>counts["p"] || counts["input"]>counts["p"] || is_a_bad_element?(el) || counts["embed"]>0 
 
         end
       end
       
-      whitelist=%w[div p li ul ol img a]
+      whitelist=%w[div span p li ul ol img a b i h1 h2 h3 br]
       
       whitelist = Hash[whitelist.zip([true] * whitelist.size)]
       
       
       ([node]+node.css("*")).each do |el|
         if whitelist[el.name]
+          puts el.name
           el.attributes.each{|a,x| el.delete(a) unless %[src href].include?(a)}
         else  
           el.swap(el.text)
         end
-      change_image_src!(node)
       end
+      
+      #transform relative img urls into absolute urls
+      change_image_src!(node)
+      
       node
       
     end
@@ -78,12 +82,14 @@ module Readability
       link_length=elem.css("a").map{|i| i.text}.join("").length
       text_length=elem.text.length
       
-      link_length/text_length.to_f
+      a=link_length/text_length.to_f
+
+      a.nan? ? 0 : a
    end
    
     def score(parent)
       score=0
-
+        
         #change score based on class
         score-=50 if parent[:class] =~ REGEXES[:NotSoGoodCandidates]
         score+=25 if parent[:class] =~ REGEXES[:GreatCandidates]
@@ -95,8 +101,10 @@ module Readability
         #change score based on # of commas
         score+=parent.text.count(",")
         score+=parent.css("p").size
+        
+      score*(1-get_link_density(parent))
       
-      score
+      
     end
   end
 end

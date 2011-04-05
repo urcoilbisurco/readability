@@ -9,7 +9,6 @@ module Readability
       :UrlRe                =>  /^(http\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(?:\/\S*)?(?:[a-zA-Z0-9_])+\.(?:jpg|jpeg|gif|png))$/
     }
     
-    
     def change_image_src!(node)
       node.css("img").each do |elem|      
           begin 
@@ -25,11 +24,18 @@ module Readability
       elem.set_attribute("src", string.to_s)
     end
     
+    def is_a_bad_element?(elem)
+      x=false
+      %w[class id].each do |e|
+        x= x | (!elem[e].nil? && %w[comment ad sidebar].any?{|a| elem[e].include?(a)})
+      end
+      x
+    end
     
     def trasform_divs_into_paragraphs!
       @html.css('*').each do |elem|
       
-        if elem.name.downcase=="div"
+        if %w[div span].any?{|a| elem.name.downcase.eql?(a)}
           if elem.inner_html  !~ REGEXES[:DivToPRe]
             puts "changed p"
             elem.name="p"
