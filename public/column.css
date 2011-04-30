@@ -34,7 +34,7 @@ body{
 
 @only screen and (device-width: 768px) { 
 	div{
-		font-size:24px;
+		font-size:40px;
 	}
 	
 }
