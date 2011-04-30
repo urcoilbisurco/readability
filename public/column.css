@@ -20,11 +20,13 @@ body{
 #succ, #prev{
 	position:absolute;
 	-webkit-tap-highlight-color: red;
-	padding:300px 20px;
+	padding:0 20px;
+	
 	font-size:30px;
 	border:1px #BCBCBC solid;
 	color:#BCBCBC;
 	cursor:pointer;
+	height:90%;
 }
 #succ{
 	right:0;
@@ -32,7 +34,9 @@ body{
 #prev{
 	left:0;
 }
-
+#succ img, #prev img{
+	vertical-align:center;
+}
 @media screen and (device-width: 768px) { 
 	div{
 		font-size:20px;
