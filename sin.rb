@@ -50,10 +50,3 @@ drag this bookmarklet to use the service:
     </table>
     <input type="submit" value="view" />
   </form>
-  
-@@url
-<link rel="stylesheet" href="column.css" type="text/css">
-<script type="text/javascript" src="javascript.js"></script>
-<div id="article" style="height:<script>getHeight();</script>">
-<%= @cont %>
-</div>

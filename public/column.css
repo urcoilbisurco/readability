@@ -1,8 +1,33 @@
+body{
+	overflow: hidden;
+}
 #article {
+	position:absolute;
+	width:800px;
+	margin:auto;
 	-moz-column-gap: 500px;
 	-webkit-column-gap: 500px;
-	column-gap: 500px;
+	column-gap: 800px;
 	-webkit-column-width: 800px;
 	column-width: 800px;
-	height:100%;
+	height:95%;
+}
+#succ{
+	position:absolute;
+	right:0;
+	padding:300px 20px;
+	font-size:30px;
+	border:1px #BCBCBC solid;
+	color:#BCBCBC;
+	cursor:pointer;
+}
+#prev{
+	font-size:30px;
+	position:absolute;
+	cursor:pointer;
+	left:0;
+	height:300px;
+	padding:300px 20px;
+	border:1px #BCBCBC solid;
+	color:#BCBCBC;
 }
