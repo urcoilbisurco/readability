@@ -1,4 +1,5 @@
 require 'rubygems'
+require 'open-uri'
 require 'sinatra'
 require './readability'
 require 'erb'
@@ -7,7 +8,7 @@ get '/' do
   @action='index'
   erb :index
 end
-post '/url' do
+get '/url' do
   @action='url'
   @@input=params[:url]
   @cont=Readability::Document.new(open(@@input)).content
@@ -16,7 +17,7 @@ post '/url' do
 end
 get'/demo' do 
   @action='url'
-  @@input='sample.html'
+  @@input="sample.html"
   @cont=Readability::Document.new(open(@@input)).content
   erb :url
 end
@@ -36,7 +37,7 @@ __END__
 
 @@ index
 hi!
-<form action="url" method="post">
+<form action="url" method="get">
     <table>
       <tr>
         <td>url</td>

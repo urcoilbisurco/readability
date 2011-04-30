@@ -68,7 +68,7 @@ module Readability
       end
       
       #transform relative img urls into absolute urls
-      change_image_src!(node)
+      change_relative_urls!(node)
       
       node
       

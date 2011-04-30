@@ -9,19 +9,26 @@ module Readability
       :UrlRe                =>  /^(http\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(?:\/\S*)?(?:[a-zA-Z0-9_])+\.(?:jpg|jpeg|gif|png))$/
     }
     
-    def change_image_src!(node)
+    def change_relative_urls!(node)
       node.css("img").each do |elem|      
           begin 
-            create_true_url!(elem) if URI.split(elem.attribute('src'))[2].nil?
+            create_true_url!(elem, 'src') if URI.split(elem.attribute('src'))[2].nil?
           rescue
             elem.remove
           end
       end  
+      node.css("a").each do |elem|      
+          begin 
+            create_true_url!(elem,'href') if URI.split(elem.attribute('href'))[2].nil?
+          rescue
+            elem.remove
+          end
+      end
     end
     
-    def create_true_url!(elem) 
-      string=URI.parse(@@input) + elem.attribute("src").to_s #elem.attribute("src").to_s
-      elem.set_attribute("src", string.to_s)
+    def create_true_url!(elem, attrib) 
+      string=URI.parse(@@input) + elem.attribute(attrib).to_s #elem.attribute("src").to_s
+      elem.set_attribute(attrib, string.to_s)
     end
     
     def is_a_bad_element?(elem)
