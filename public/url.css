@@ -1,11 +1,10 @@
 body{
 	background-color:#F3F3F3;
-	margin:30px auto;
-	width:640px;
+	margin-top:30px;
 	
 }
 
-div p{
+div{
 	font-size:19px;
 	text-align: justify;
 	line-height:1.5em;
@@ -27,13 +26,11 @@ img{
 	background-color:white;
 	border:1px #C9C9C9 solid;
 }
-img:active, img:visited{
-	width:100%;
-}
+
 a{
 	color:#424242;
 	
 }
 ul, ol{
-	font-size:18px;
+	font-size:20px;
 }

@@ -1,5 +1,8 @@
 body{
 	overflow: hidden;
+
+	top: 0;
+	left: 0;
 }
 #article {
 	position:absolute;
@@ -11,23 +14,27 @@ body{
 	-webkit-column-width: 800px;
 	column-width: 800px;
 	height:95%;
+
+}
+#succ, #prev{
+	position:absolute;
+	-webkit-tap-highlight-color: #BCBCBC;
+	padding:300px 20px;
+	font-size:30px;
+	border:1px #BCBCBC solid;
+	color:#BCBCBC;
+	cursor:pointer;
 }
 #succ{
-	position:absolute;
 	right:0;
-	padding:300px 20px;
-	font-size:30px;
-	border:1px #BCBCBC solid;
-	color:#BCBCBC;
-	cursor:pointer;
 }
 #prev{
-	font-size:30px;
-	position:absolute;
-	cursor:pointer;
 	left:0;
-	height:300px;
-	padding:300px 20px;
-	border:1px #BCBCBC solid;
-	color:#BCBCBC;
+}
+
+@only screen and (device-width: 768px) { 
+	div{
+		font-size:24px;
+	}
+	
 }

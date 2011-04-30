@@ -26,15 +26,6 @@ end
 
 
 __END__
-@@layout
-<html>
-  <head><link rel="stylesheet" href=<%="#{@action}.css"%> type="text/css"></head>
-
-  <body>
-    <%= yield %>
-  </body>
-</html>
-
 
 @@ index
 hi!
