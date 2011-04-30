@@ -35,13 +35,13 @@ body{
 
 @media screen and (device-width: 768px) { 
 	div{
-		font-size:24px;
+		font-size:30px;
 	}
 	
 }
 
 @media screen and (max-device-width: 480px), screen and (-webkit-min-device-pixel-ratio: 2) {
 	div{
-		font-size:24px;
+		font-size:40px;
 	}
 }
