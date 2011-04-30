@@ -1,0 +1,8 @@
+#article {
+	-moz-column-gap: 500px;
+	-webkit-column-gap: 500px;
+	column-gap: 500px;
+	-webkit-column-width: 800px;
+	column-width: 800px;
+	height:100%;
+}

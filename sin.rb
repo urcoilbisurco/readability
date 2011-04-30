@@ -29,6 +29,7 @@ __END__
 @@layout
 <html>
   <head><link rel="stylesheet" href=<%="#{@action}.css"%> type="text/css"></head>
+
   <body>
     <%= yield %>
   </body>
@@ -51,6 +52,8 @@ drag this bookmarklet to use the service:
   </form>
   
 @@url
-<div>
+<link rel="stylesheet" href="column.css" type="text/css">
+<script type="text/javascript" src="javascript.js"></script>
+<div id="article" style="height:<script>getHeight();</script>">
 <%= @cont %>
 </div>
