@@ -38,7 +38,7 @@ module Readability
       @output.add_child(cleaned_text)
 
       #returns
-      @output.to_html(:encoding=>"UTF-8").gsub(/[\r\n\f]+/,"\n").gsub(/[\t ]+/, " ").gsub(/&nbsp;/," ")
+      @output.to_html(:encoding=>"UTF-8")
 
     end
     
