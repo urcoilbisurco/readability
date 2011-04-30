@@ -37,6 +37,9 @@ __END__
 
 @@ index
 hi!
+drag this bookmarklet to use the service:
+<%= erb :bookmarklet, :layout => false %>
+
 <form action="url" method="get">
     <table>
       <tr>
