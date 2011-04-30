@@ -14,11 +14,12 @@ body{
 	-webkit-column-width: 800px;
 	column-width: 800px;
 	height:95%;
+	-webkit-text-size-adjust:auto
 
 }
 #succ, #prev{
 	position:absolute;
-	-webkit-tap-highlight-color: #BCBCBC;
+	-webkit-tap-highlight-color: red;
 	padding:300px 20px;
 	font-size:30px;
 	border:1px #BCBCBC solid;
@@ -32,7 +33,7 @@ body{
 	left:0;
 }
 
-@only screen and (device-width: 768px) { 
+@media screen and (device-width: 768px) { 
 	div{
 		font-size:40px;
 	}
