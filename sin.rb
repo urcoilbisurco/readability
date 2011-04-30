@@ -1,6 +1,6 @@
 require 'rubygems'
-require 'open-uri'
 require 'sinatra'
+require 'open-uri'
 require './readability'
 require 'erb'
 require 'cgi'

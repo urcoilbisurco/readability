@@ -1,2 +1,2 @@
-require './sin'
+require 'sin'
 run Sinatra::Application
