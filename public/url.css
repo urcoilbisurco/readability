@@ -25,6 +25,8 @@ img{
 	padding:3px;
 	background-color:white;
 	border:1px #C9C9C9 solid;
+-webkit-column-break-inside : avoid;
+
 }
 
 a{
@@ -32,5 +34,4 @@ a{
 	
 }
 ul, ol{
-	font-size:20px;
 }

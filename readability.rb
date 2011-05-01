@@ -25,8 +25,8 @@ module Readability
       
       @html_title=@html.at_css("title").text
       @parents=@html.css("p").map{ |p| p.parent }.compact.uniq
-      
       cand=@parents.map{|p| [p, score(p)]}.max{|a,b| a[1]<=>b[1]}
+
       cleaned_text=sanitize(cand[0])
       create_output!(cleaned_text)
       #create_style!
@@ -81,9 +81,7 @@ module Readability
     def get_link_density(elem)
       link_length=elem.css("a").map{|i| i.text}.join("").length
       text_length=elem.text.length
-      
       a=link_length/text_length.to_f
-
       a.nan? ? 0 : a
    end
    
@@ -99,6 +97,7 @@ module Readability
         score+=25 if parent[:id] =~ REGEXES[:GreatCandidates]
 
         #change score based on # of commas
+        puts parent.text.nil?
         score+=parent.text.count(",")
         score+=parent.css("p").size
         

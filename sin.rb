@@ -10,9 +10,8 @@ get '/' do
 end
 get '/url' do
   @action='url'
-  @@input=params[:url]
+  @@input=create_full_url!(params[:url])
   @cont=Readability::Document.new(open(@@input)).content
-  
   erb :url
 end
 get'/demo' do 

@@ -1,9 +1,13 @@
+def create_full_url!(url)
+  url !~ /^[^:]+(?=:\/\/)/ ? "http://"+ url : url
+end
+
 module Readability
   
   class Document
     
     REGEXES={
-      :DivToPRe             =>  /<(blockquote|div|dl|img|ol|p|pre|ul|table)/i,
+      :DivToPRe             =>  /<(blockquote|dl|img|ol|p|pre|ul|table)/i,
       :NotSoGoodCandidates  =>  /<(comment|meta|footer|footnote|disqus|extra|sidebar|sponsor|popup)/i,
       :GreatCandidates      =>  /<(article|body|content|entry|main|page|pagination|post|text|blog|story)/i,
       :UrlRe                =>  /^(http\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(?:\/\S*)?(?:[a-zA-Z0-9_])+\.(?:jpg|jpeg|gif|png))$/
